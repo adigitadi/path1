@@ -1,6 +1,7 @@
 package com.path1.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -18,6 +19,11 @@ public class PathRestController {
   @PostMapping("/getPaths")
   public List<List<Vertex>> generatePaths(@Valid @RequestBody Input input) {
     return PathGenerator.generatePaths(input);
+  }
+  
+  @PostMapping("/getGroups")
+  public Map<String, List<Vertex>> groupRiders(@Valid @RequestBody Input input) {
+    return PathGenerator.groupRiders(input);
   }
 
 }

@@ -14,26 +14,9 @@ public class PathGenerator {
 
   public static List<List<Vertex>> generatePaths(Input input) {
    
-    List<Vertex> vertices = input.getVertices();
-
-    int clusters = input.getNumOfCabs();
-
-    int perCar = input.getNumPerCar();
-
-    Map<String, List<Vertex>> group = cluster(vertices, clusters, createCentroids(clusters, vertices), perCar);
-
-    Map<String, List<Vertex>> group1 = cluster(vertices, clusters, reiterate(group, vertices), perCar);
-
-    int count = 0;
-    while(!group1.equals(group) && count < 1000) {
-      group = group1;
-      group1 = cluster(vertices, clusters, reiterate(group, vertices), perCar);
-      count++;
-    }
-
     Vertex s = input.getSource();
 
-    return findAllPaths(group1, s);
+    return findAllPaths(groupRiders(input), s);
     
   }
   
@@ -243,6 +226,26 @@ public class PathGenerator {
     } else {
       subsets.add(set);
     }
+  }
+
+  public static Map<String, List<Vertex>> groupRiders(Input input) {
+    List<Vertex> vertices = input.getVertices();
+
+    int clusters = input.getNumOfCabs();
+
+    int perCar = input.getNumPerCar();
+
+    Map<String, List<Vertex>> group = cluster(vertices, clusters, createCentroids(clusters, vertices), perCar);
+
+    Map<String, List<Vertex>> group1 = cluster(vertices, clusters, reiterate(group, vertices), perCar);
+
+    int count = 0;
+    while(!group1.equals(group) && count < 1000) {
+      group = group1;
+      group1 = cluster(vertices, clusters, reiterate(group, vertices), perCar);
+      count++;
+    }
+    return group1;
   }
   
 }
