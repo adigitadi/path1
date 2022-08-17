@@ -17,6 +17,10 @@ public class PathGenerator {
 
     Vertex s = input.getSource();
 
+    if(s == null) {
+      throw new IllegalArgumentException("source is null");
+    }
+    
     return findAllPaths(groupRiders(input), s);
 
   }
@@ -24,7 +28,7 @@ public class PathGenerator {
   public static List<List<Vertex>> generatePathsUsingHamiltonian(Input input) {
 
     Vertex s = input.getSource();
-
+    
     List<List<Vertex>> finalPaths = new ArrayList<>();
 
     List<Vertex> finalPath = new ArrayList<>();
@@ -282,10 +286,14 @@ public class PathGenerator {
   public static Map<String, List<Vertex>> groupRiders(Input input) {
     List<Vertex> vertices = input.getVertices();
 
+    if(vertices == null || vertices.isEmpty()) {
+      throw new IllegalArgumentException("no riders sent");
+    }
+    
     int clusters = input.getNumOfCabs();
-
-    int perCar = input.getNumPerCar();
-
+    
+    int perCar = input.getNumPerCar();      
+    
     Map<String, List<Vertex>> group = cluster(vertices, clusters, createCentroids(clusters, vertices), perCar);
 
     Map<String, List<Vertex>> group1 = cluster(vertices, clusters, reiterate(group, vertices), perCar);
@@ -301,8 +309,6 @@ public class PathGenerator {
 
   private static void getHamiltonianPath(Vertex vertex, Vertex source, Stack<Vertex> path, List<Vertex> vertices,
       double[][] distance, boolean[] visited, List<List<Vertex>> ans) {
-    //Base condition: if the vertex is the start vertex
-    //and all nodes have been visited (start vertex twice)
     if (vertex == source && path.size() == vertices.size() + 1) {
 
       List<Vertex> temp = new ArrayList<>();
@@ -321,14 +327,10 @@ public class PathGenerator {
       }
       if (distance[vertices.indexOf(vertex)][i] >= 1 && visited[i] == false) {
         int current = i;
-        //visit and add vertex to the cycle
         visited[current] = true;
         path.push(vertices.get(current));
 
-        //Go to the neighbor vertex to find the cycle
         getHamiltonianPath(vertices.get(current), source, path, vertices, distance, visited, ans);
-
-        //Backtrack
         visited[current] = false;
         path.pop();
       }
