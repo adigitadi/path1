@@ -3,14 +3,19 @@ package com.path1.compute;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Vertex {
 
+  @JsonProperty("name")
   @NotBlank
   String name;
   
+  @JsonProperty("x")
   @NotNull
   double x;
   
+  @JsonProperty("y")
   @NotNull
   double y;
   
@@ -35,6 +40,10 @@ public class Vertex {
     return y;
   }
 
+  public Vertex() {
+    
+  }
+  
   public Vertex(String name, double x, double y) {
     this.name = name;
     this.x = x;

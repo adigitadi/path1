@@ -6,11 +6,14 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Input {
 
   @NotNull
   private List<Vertex> vertices;
   
+  @JsonProperty("source")
   @NotNull
   private Vertex source;
   
