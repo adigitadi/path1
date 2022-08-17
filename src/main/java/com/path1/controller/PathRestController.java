@@ -21,6 +21,11 @@ public class PathRestController {
     return PathGenerator.generatePaths(input);
   }
   
+  @PostMapping("/getPathsUsingHamiltonian")
+  public List<List<Vertex>> generatePathsUsingHamiltonian(@Valid @RequestBody Input input) {
+     return PathGenerator.generatePathsUsingHamiltonian(input);
+  }
+  
   @PostMapping("/getGroups")
   public Map<String, List<Vertex>> groupRiders(@Valid @RequestBody Input input) {
     return PathGenerator.groupRiders(input);

@@ -9,17 +9,66 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.Stack;
 
 public class PathGenerator {
 
   public static List<List<Vertex>> generatePaths(Input input) {
-   
+
     Vertex s = input.getSource();
 
     return findAllPaths(groupRiders(input), s);
-    
+
   }
-  
+
+  public static List<List<Vertex>> generatePathsUsingHamiltonian(Input input) {
+
+    Vertex s = input.getSource();
+
+    List<List<Vertex>> finalPaths = new ArrayList<>();
+
+    List<Vertex> finalPath = new ArrayList<>();
+    Stack<Vertex> path = new Stack<>();
+    path.push(s);
+
+    Map<String, List<Vertex>> group1 = groupRiders(input);
+
+    for(List<Vertex> list : group1.values()) {
+
+      double[][] distance = new double[list.size() + 1][list.size() + 1];
+      list.add(0, s);
+
+      for(int i =0; i < list.size() -1; i++) {
+        for(int j =i; j < list.size(); j++) {
+          distance[i][j] = getDistance(list.get(i).x, list.get(i).y, list.get(j).x, list.get(j).y);
+          distance[j][i] = distance[i][j];
+        }
+      }
+
+      boolean[] visited = new boolean[list.size()];
+
+      List<List<Vertex>> ans = new ArrayList<>();
+      getHamiltonianPath(s, s, path, list, distance, visited, ans);
+      Double min = Double.MAX_VALUE;
+      finalPath = new ArrayList<>();
+      for(List<Vertex> current : ans) {
+        Double sum =0.0;
+        for(int i=0;i<current.size()-1;i++) {
+          sum+= getDistance(current.get(i).x, current.get(i).y, current.get(i+1).x, current.get(i+1).y);
+        }
+
+        if(min > sum) {
+          min = sum;
+          finalPath = current;
+        }
+
+      }
+      finalPaths.add(finalPath);
+    }
+    return finalPaths;
+
+  }
+
   private static Map<String, List<Vertex>> cluster(List<Vertex> vertices, int k, List<Vertex> centroids, int perCar) {
     PriorityQueue<Edge> pq = new PriorityQueue<Edge>((a,b)-> Double.compare(a.distance, b.distance));
     Set<String> grouped = new HashSet<>();
@@ -45,11 +94,11 @@ public class PathGenerator {
     return map;
 
   }
-  
+
   private static double getDistance(double x1, double y1, double x2, double y2) {
     return Point2D.distance(x1, y1, x2, y2);
   }
-  
+
   private static List<Vertex> createCentroids(int clusters, List<Vertex> vertices) {
     List<Vertex> centroids = new ArrayList<>();
 
@@ -78,7 +127,7 @@ public class PathGenerator {
 
     return centroids;
   }
-  
+
   private static List<Vertex> reiterate(Map<String, List<Vertex>> group, List<Vertex> vertices) {
     List<Vertex> res = new ArrayList<>();
     Set<String> centroids = group.keySet();
@@ -100,7 +149,7 @@ public class PathGenerator {
 
     return res;
   }
-  
+
   private static List<List<Vertex>> findAllPaths(Map<String, List<Vertex>> group1, Vertex startingPoint) {
     List<Integer> tour = new ArrayList<>();
     List<List<Vertex>> allPaths = new ArrayList<>();
@@ -122,7 +171,7 @@ public class PathGenerator {
       double[][] dp = new double[n][(int) Math.pow(2, n)];
 
       int start = 0;
-      
+
       for (int end = 0; end < n; end++) {
         if (end == start) {
           continue;
@@ -203,7 +252,7 @@ public class PathGenerator {
 
     return allPaths;
   }
-  
+
   private static List<Integer> perumatations(int n1, int n2) {
     List<Integer> subsets = new ArrayList<>();
     combinations(0, 0, n1, n2, subsets);
@@ -214,7 +263,7 @@ public class PathGenerator {
 
     int eleLeft = n - current;
     if (eleLeft < r) {
-        return;
+      return;
     }
 
     if (r != 0) {
@@ -247,5 +296,44 @@ public class PathGenerator {
     }
     return group1;
   }
-  
+
+  private static void getHamiltonianPath(Vertex vertex, Vertex source, Stack<Vertex> path, List<Vertex> vertices,
+      double[][] distance, boolean[] visited, List<List<Vertex>> ans) {
+    //Base condition: if the vertex is the start vertex
+    //and all nodes have been visited (start vertex twice)
+    if (vertex == source && path.size() == vertices.size() + 1) {
+
+      List<Vertex> temp = new ArrayList<>();
+
+      int n = path.size();
+      for (int i=0; i<n;i++) {
+        temp.add(path.get(n-i-1));
+      }
+
+      ans.add(temp);
+    }
+
+    for (int i = 0; i < vertices.size(); i++) {
+      if(path.size() < vertices.size() && i ==0) {
+        continue;
+      }
+      if (distance[vertices.indexOf(vertex)][i] >= 1 && visited[i] == false) {
+        int current = i;
+        //visit and add vertex to the cycle
+        visited[current] = true;
+        path.push(vertices.get(current));
+
+        //Go to the neighbor vertex to find the cycle
+        getHamiltonianPath(vertices.get(current), source, path, vertices, distance, visited, ans);
+
+        //Backtrack
+        visited[current] = false;
+        path.pop();
+      }
+    }
+
+  }
+
+
+
 }
