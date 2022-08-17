@@ -151,9 +151,8 @@ public class PathGenerator {
   }
 
   private static List<List<Vertex>> findAllPaths(Map<String, List<Vertex>> group1, Vertex startingPoint) {
-    List<Integer> tour = new ArrayList<>();
+    List<Integer> path = new ArrayList<>();
     List<List<Vertex>> allPaths = new ArrayList<>();
-    double minCost = Double.POSITIVE_INFINITY;
     for(List<Vertex> list : group1.values()) {
       double[][] distance = new double[list.size() + 1][list.size() + 1];
       list.add(0, startingPoint);
@@ -179,8 +178,8 @@ public class PathGenerator {
         dp[end][(1 << start) | (1 << end)] = distance[start][end];
       }
 
-      for (int r = 3; r <= n; r++) {
-        for (int subset : perumatations(r, n)) {
+      for (int i = 3; i <= n; i++) {
+        for (int subset : perumatations(i, n)) {
           if (((1 << start) & subset) == 0) {
             continue;
           }
@@ -204,17 +203,18 @@ public class PathGenerator {
         }
       }
 
+      Double min = Double.POSITIVE_INFINITY;
       for (int i = 0; i < n; i++) {
         if (i == start) continue;
         double tourCost = dp[i][finalState] + distance[i][start];
-        if (tourCost < minCost) {
-          minCost = tourCost;
+        if (tourCost < min) {
+          min = tourCost;
         }
       }
 
       int lastIndex = start;
       int state = finalState;
-      tour.add(start);
+      path.add(start);
 
       for (int i = 1; i < n; i++) {
 
@@ -223,7 +223,9 @@ public class PathGenerator {
           if (j == start || ((1 << j) & state) == 0) {
             continue;
           }
-          if (index == -1) index = j;
+          if (index == -1) {
+            index = j;
+          }
           double prevDist = dp[index][state] + distance[index][lastIndex];
           double newDist  = dp[j][state] + distance[j][lastIndex];
           if (newDist < prevDist) {
@@ -231,22 +233,22 @@ public class PathGenerator {
           }
         }
 
-        tour.add(index);
+        path.add(index);
         state = state ^ (1 << index);
         lastIndex = index;
       }
 
-      tour.add(start);
-      Collections.reverse(tour);
+      path.add(start);
+      Collections.reverse(path);
 
-      List<Vertex> path = new ArrayList<>();
+      List<Vertex> finalPath = new ArrayList<>();
 
-      for(int i=0; i< tour.size(); i++) {
-        path.add(list.get(tour.get(i)));
+      for(int i=0; i< path.size(); i++) {
+        finalPath.add(list.get(path.get(i)));
       }
 
-      allPaths.add(path);
-      tour = new ArrayList<>();
+      allPaths.add(finalPath);
+      path = new ArrayList<>();
 
     }
 
