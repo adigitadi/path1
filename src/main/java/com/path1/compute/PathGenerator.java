@@ -13,6 +13,7 @@ import java.util.Stack;
 
 public class PathGenerator {
 
+  //gives list of all paths that would be taken by cabs using dynamic programming.
   public static List<List<Vertex>> generatePaths(Input input) {
 
     Vertex s = input.getSource();
@@ -25,6 +26,7 @@ public class PathGenerator {
 
   }
 
+  //gives list of all paths that would be taken by cabs using Hamiltonian cycle(brute force).
   public static List<List<Vertex>> generatePathsUsingHamiltonian(Input input) {
 
     Vertex s = input.getSource();
@@ -35,6 +37,7 @@ public class PathGenerator {
     Stack<Vertex> path = new Stack<>();
     path.push(s);
 
+    //call function to group riders so paths can be formed for each group.
     Map<String, List<Vertex>> group1 = groupRiders(input);
 
     for(List<Vertex> list : group1.values()) {
@@ -103,6 +106,7 @@ public class PathGenerator {
     return Point2D.distance(x1, y1, x2, y2);
   }
 
+  //create centroids based on range of x and y coordinates.
   private static List<Vertex> createCentroids(int clusters, List<Vertex> vertices) {
     List<Vertex> centroids = new ArrayList<>();
 
@@ -123,6 +127,7 @@ public class PathGenerator {
 
     int factor = n-1/clusters-1;
 
+    //takes x and y coordinates such that they are evenly spaced.
     while(count <= clusters) {
       int current = 0;
       centroids.add(new Vertex("v"+count++, xCoords.get(current), yCoords.get(current)));
@@ -132,6 +137,7 @@ public class PathGenerator {
     return centroids;
   }
 
+  //once we get the first cluster we can reiterate to improve the grouping.
   private static List<Vertex> reiterate(Map<String, List<Vertex>> group, List<Vertex> vertices) {
     List<Vertex> res = new ArrayList<>();
     Set<String> centroids = group.keySet();
@@ -154,6 +160,7 @@ public class PathGenerator {
     return res;
   }
 
+  //finds paths using dynamic programming.
   private static List<List<Vertex>> findAllPaths(Map<String, List<Vertex>> group1, Vertex startingPoint) {
     List<Integer> path = new ArrayList<>();
     List<List<Vertex>> allPaths = new ArrayList<>();
@@ -282,7 +289,8 @@ public class PathGenerator {
       subsets.add(set);
     }
   }
-
+  
+  //groups all riders into groups using k-means clustering.
   public static Map<String, List<Vertex>> groupRiders(Input input) {
     List<Vertex> vertices = input.getVertices();
 
@@ -307,6 +315,7 @@ public class PathGenerator {
     return group1;
   }
 
+  //creates all possible hamiltonian pathsand puts them in a list.
   private static void getHamiltonianPath(Vertex vertex, Vertex source, Stack<Vertex> path, List<Vertex> vertices,
       double[][] distance, boolean[] visited, List<List<Vertex>> ans) {
     if (vertex == source && path.size() == vertices.size() + 1) {
