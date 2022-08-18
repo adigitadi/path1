@@ -76,6 +76,7 @@ public class PathGenerator {
 
   }
 
+  //forms clusters based on centroids.
   private static Map<String, List<Vertex>> cluster(List<Vertex> vertices, int k, List<Vertex> centroids, int perCar) {
     PriorityQueue<Edge> pq = new PriorityQueue<Edge>((a,b)-> Double.compare(a.distance, b.distance));
     Set<String> grouped = new HashSet<>();
@@ -175,13 +176,14 @@ public class PathGenerator {
         }
       }
 
-      //start
       int n = distance.length;
       int finalState = (int) Math.pow(2, n) - 1;
+      //save cost based on last visited vertex and visited nodes, visited nodes are stored using bits instead of list/set.
       double[][] dp = new double[n][(int) Math.pow(2, n)];
 
       int start = 0;
 
+      //setting up dp matrix based on distances from starting point to every other point.
       for (int end = 0; end < n; end++) {
         if (end == start) {
           continue;
@@ -189,6 +191,7 @@ public class PathGenerator {
         dp[end][(1 << start) | (1 << end)] = distance[start][end];
       }
 
+      //get all combinations of visited nodes and simultaneously store cost for reuse.
       for (int i = 3; i <= n; i++) {
         for (int subset : perumatations(i, n)) {
           if (((1 << start) & subset) == 0) {
@@ -214,12 +217,13 @@ public class PathGenerator {
         }
       }
 
+      //calculating the minimum path cost.
       Double min = Double.POSITIVE_INFINITY;
       for (int i = 0; i < n; i++) {
         if (i == start) continue;
-        double tourCost = dp[i][finalState] + distance[i][start];
-        if (tourCost < min) {
-          min = tourCost;
+        double cost = dp[i][finalState] + distance[i][start];
+        if (cost < min) {
+          min = cost;
         }
       }
 
@@ -227,6 +231,7 @@ public class PathGenerator {
       int state = finalState;
       path.add(start);
 
+      //creating path using the dp table.
       for (int i = 1; i < n; i++) {
 
         int index = -1;
@@ -249,9 +254,11 @@ public class PathGenerator {
         lastIndex = index;
       }
 
-      path.add(start);
       Collections.reverse(path);
-
+      int n1 = path.size();
+      path.remove(n1-1);
+      path.add(0, list.indexOf(startingPoint));
+      
       List<Vertex> finalPath = new ArrayList<>();
 
       for(int i=0; i< path.size(); i++) {
@@ -266,6 +273,7 @@ public class PathGenerator {
     return allPaths;
   }
 
+  //gives all possible combinations of 0's and 1's to represent visited nodes.
   private static List<Integer> perumatations(int n1, int n2) {
     List<Integer> subsets = new ArrayList<>();
     combinations(0, 0, n1, n2, subsets);
@@ -315,7 +323,7 @@ public class PathGenerator {
     return group1;
   }
 
-  //creates all possible hamiltonian pathsand puts them in a list.
+  //creates all possible hamiltonian paths and puts them in a list.
   private static void getHamiltonianPath(Vertex vertex, Vertex source, Stack<Vertex> path, List<Vertex> vertices,
       double[][] distance, boolean[] visited, List<List<Vertex>> ans) {
     if (vertex == source && path.size() == vertices.size() + 1) {
